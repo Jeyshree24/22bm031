@@ -1,0 +1,39 @@
+% Load the Fisher Iris dataset
+load fisheriris
+% Prepare the data
+X = meas; % Features
+y = species; % Labels
+% Convert categorical labels to numeric
+y_numeric = grp2idx(y);
+% Split the dataset into training and testing sets
+cv = cvpartition(y_numeric, 'HoldOut', 0.2);
+idx = cv.test;
+% Separate to training and test data
+X_train = X(~idx, :);
+y_train = y_numeric(~idx);
+X_test = X(idx, :);
+y_test = y_numeric(idx);
+% Train a decision tree classifier
+model = fitctree(X_train, y_train);
+% Make predictions
+y_pred = predict(model, X_test);
+% Evaluate the model
+accuracy = sum(y_pred == y_test) / length(y_test);
+precision = sum((y_pred == y_test) & (y_pred == 1)) / sum(y_pred == 1);
+recall = sum((y_pred == y_test) & (y_pred == 1)) / sum(y_test == 1);
+f1 = 2 * (precision * recall) / (precision + recall);
+% Display evaluation metrics
+fprintf('Model Evaluation Metrics:\n');
+fprintf('Accuracy: %.2f\n', accuracy);
+fprintf('Precision: %.2f\n', precision);
+fprintf('Recall: %.2f\n', recall);
+fprintf('F1 Score: %.2f\n', f1);
+% Generate confusion matrix
+conf_matrix = confusionmat(y_test, y_pred);
+% Plot confusion matrix
+figure;
+heatmap(conf_matrix, 'Title', 'Confusion Matrix', ...
+         'XLabel', 'Predicted', 'YLabel', 'Actual', ...
+         'CellLabelFormat', '%d', ...
+         'XDisplayLabels', unique(y), ...
+         'YDisplayLabels', unique(y));
